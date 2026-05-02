@@ -1,0 +1,1346 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SHOEVAULT — Premium Footwear</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+<script>
+tailwind.config = {
+  theme: {
+    extend: {
+      colors: {
+        bg: '#0f0f0f',
+        surface: '#1a1a1a',
+        card: '#222222',
+        border: '#333333',
+        muted: '#888888',
+        fg: '#f0ece6',
+        accent: '#d4a853',
+        accentDark: '#b8903a',
+        danger: '#e05252',
+        success: '#4caf7d',
+      },
+      fontFamily: {
+        display: ['Playfair Display', 'serif'],
+        body: ['DM Sans', 'sans-serif'],
+      }
+    }
+  }
+}
+</script>
+<style>
+  :root {
+    --bg: #0f0f0f;
+    --surface: #1a1a1a;
+    --card: #222222;
+    --border: #333333;
+    --muted: #888888;
+    --fg: #f0ece6;
+    --accent: #d4a853;
+    --accent-dark: #b8903a;
+  }
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body { font-family:'DM Sans',sans-serif; background:var(--bg); color:var(--fg); overflow-x:hidden; }
+  ::-webkit-scrollbar { width:6px; }
+  ::-webkit-scrollbar-track { background:var(--bg); }
+  ::-webkit-scrollbar-thumb { background:var(--border); border-radius:3px; }
+  ::-webkit-scrollbar-thumb:hover { background:var(--muted); }
+
+  /* Hero gradient blobs */
+  .hero-blob {
+    position:absolute; border-radius:50%; filter:blur(120px); opacity:0.15; pointer-events:none;
+  }
+  .hero-blob-1 { width:600px;height:600px;background:var(--accent);top:-200px;right:-100px;animation:blobFloat 8s ease-in-out infinite; }
+  .hero-blob-2 { width:400px;height:400px;background:#e05252;bottom:-100px;left:-50px;animation:blobFloat 10s ease-in-out infinite reverse; }
+
+  @keyframes blobFloat {
+    0%,100% { transform:translate(0,0) scale(1); }
+    50% { transform:translate(30px,-20px) scale(1.05); }
+  }
+  @keyframes fadeInUp {
+    from { opacity:0; transform:translateY(30px); }
+    to { opacity:1; transform:translateY(0); }
+  }
+  @keyframes slideInRight {
+    from { transform:translateX(100%); }
+    to { transform:translateX(0); }
+  }
+  @keyframes slideOutRight {
+    from { transform:translateX(0); }
+    to { transform:translateX(100%); }
+  }
+  @keyframes toastIn {
+    from { opacity:0; transform:translateY(-20px) scale(0.95); }
+    to { opacity:1; transform:translateY(0) scale(1); }
+  }
+  @keyframes toastOut {
+    from { opacity:1; transform:translateY(0) scale(1); }
+    to { opacity:0; transform:translateY(-20px) scale(0.95); }
+  }
+  @keyframes pulse-accent {
+    0%,100% { box-shadow:0 0 0 0 rgba(212,168,83,0.4); }
+    50% { box-shadow:0 0 0 10px rgba(212,168,83,0); }
+  }
+  @keyframes shimmer {
+    0% { background-position:-200% 0; }
+    100% { background-position:200% 0; }
+  }
+
+  .fade-in-up { animation: fadeInUp 0.6s ease forwards; }
+  .cart-open { animation: slideInRight 0.35s ease forwards; }
+  .cart-close { animation: slideOutRight 0.3s ease forwards; }
+  .toast-in { animation: toastIn 0.3s ease forwards; }
+  .toast-out { animation: toastOut 0.3s ease forwards; }
+
+  .product-card:hover .product-img {
+    transform: scale(1.08);
+  }
+  .product-card:hover .product-overlay {
+    opacity:1;
+  }
+  .product-card .product-img {
+    transition: transform 0.5s cubic-bezier(0.25,0.46,0.45,0.94);
+  }
+  .product-card .product-overlay {
+    opacity:0; transition: opacity 0.35s ease;
+  }
+
+  .cat-btn.active {
+    background: var(--accent);
+    color: #0f0f0f;
+    border-color: var(--accent);
+  }
+
+  .admin-panel { display:none; }
+  .admin-panel.show { display:block; }
+
+  .upload-zone {
+    border:2px dashed var(--border);
+    transition: all 0.3s ease;
+  }
+  .upload-zone:hover, .upload-zone.dragover {
+    border-color: var(--accent);
+    background: rgba(212,168,83,0.05);
+  }
+
+  .size-btn.selected {
+    background: var(--accent);
+    color: #0f0f0f;
+    border-color: var(--accent);
+  }
+
+  .qty-btn:hover { background: var(--accent); color:#0f0f0f; }
+
+  .nav-link { position:relative; }
+  .nav-link::after {
+    content:''; position:absolute; bottom:-2px; left:0; width:0; height:2px;
+    background:var(--accent); transition:width 0.3s ease;
+  }
+  .nav-link:hover::after { width:100%; }
+
+  .badge-pulse { animation: pulse-accent 2s infinite; }
+
+  .shimmer-bg {
+    background: linear-gradient(90deg, transparent 0%, rgba(212,168,83,0.05) 50%, transparent 100%);
+    background-size: 200% 100%;
+    animation: shimmer 3s infinite;
+  }
+
+  /* Modal backdrop */
+  .modal-backdrop {
+    background: rgba(0,0,0,0.7);
+    backdrop-filter: blur(8px);
+  }
+
+  input[type="file"] { display:none; }
+
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+      animation-duration: 0.01ms !important;
+      transition-duration: 0.01ms !important;
+    }
+  }
+</style>
+</head>
+<body>
+
+<!-- Toast Container -->
+<div id="toastContainer" class="fixed top-4 right-4 z-[9999] flex flex-col gap-2 pointer-events-none"></div>
+
+<!-- Header -->
+<header class="fixed top-0 left-0 w-full z-50 bg-bg/80 backdrop-blur-xl border-b border-border">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div class="flex items-center justify-between h-16 sm:h-20">
+      <!-- Logo -->
+      <a href="#" onclick="showSection('home')" class="flex items-center gap-2 group">
+        <div class="w-9 h-9 bg-accent rounded-lg flex items-center justify-center group-hover:scale-110 transition-transform">
+          <i class="fa-solid fa-shoe-prints text-bg text-sm"></i>
+        </div>
+        <span class="font-display text-xl sm:text-2xl font-900 tracking-tight">SHOE<span class="text-accent">VAULT</span></span>
+      </a>
+
+      <!-- Desktop Nav -->
+      <nav class="hidden md:flex items-center gap-8">
+        <a href="#" onclick="showSection('home')" class="nav-link text-sm font-medium text-fg/80 hover:text-fg transition">Home</a>
+        <a href="#" onclick="scrollToProducts()" class="nav-link text-sm font-medium text-fg/80 hover:text-fg transition">Shop</a>
+        <a href="#" onclick="showSection('home')" class="nav-link text-sm font-medium text-fg/80 hover:text-fg transition">About</a>
+        <a href="#" onclick="toggleAdmin()" class="nav-link text-sm font-medium text-fg/80 hover:text-accent transition">
+          <i class="fa-solid fa-gear mr-1"></i> Admin
+        </a>
+      </nav>
+
+      <!-- Actions -->
+      <div class="flex items-center gap-3">
+        <!-- Search Toggle -->
+        <button onclick="toggleSearch()" class="w-10 h-10 rounded-full border border-border flex items-center justify-center hover:border-accent hover:text-accent transition" aria-label="Search">
+          <i class="fa-solid fa-magnifying-glass text-sm"></i>
+        </button>
+        <!-- Cart -->
+        <button onclick="toggleCart()" class="relative w-10 h-10 rounded-full border border-border flex items-center justify-center hover:border-accent hover:text-accent transition" aria-label="Cart">
+          <i class="fa-solid fa-bag-shopping text-sm"></i>
+          <span id="cartBadge" class="absolute -top-1 -right-1 w-5 h-5 bg-accent text-bg text-[10px] font-bold rounded-full flex items-center justify-center badge-pulse hidden">0</span>
+        </button>
+        <!-- Mobile Menu -->
+        <button onclick="toggleMobileMenu()" class="md:hidden w-10 h-10 rounded-full border border-border flex items-center justify-center hover:border-accent hover:text-accent transition" aria-label="Menu">
+          <i class="fa-solid fa-bars text-sm"></i>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Search Bar -->
+  <div id="searchBar" class="hidden border-t border-border">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3">
+      <div class="relative">
+        <i class="fa-solid fa-magnifying-glass absolute left-4 top-1/2 -translate-y-1/2 text-muted text-sm"></i>
+        <input type="text" id="searchInput" oninput="filterProducts()" placeholder="Search shoes by name, category, or brand..." class="w-full bg-surface border border-border rounded-xl pl-11 pr-4 py-3 text-fg text-sm focus:outline-none focus:border-accent transition placeholder:text-muted/60">
+      </div>
+    </div>
+  </div>
+
+  <!-- Mobile Menu -->
+  <div id="mobileMenu" class="hidden md:hidden border-t border-border bg-surface/95 backdrop-blur-xl">
+    <div class="px-4 py-4 flex flex-col gap-3">
+      <a href="#" onclick="showSection('home');toggleMobileMenu()" class="text-sm font-medium py-2 px-3 rounded-lg hover:bg-card transition">Home</a>
+      <a href="#" onclick="scrollToProducts();toggleMobileMenu()" class="text-sm font-medium py-2 px-3 rounded-lg hover:bg-card transition">Shop</a>
+      <a href="#" onclick="toggleAdmin();toggleMobileMenu()" class="text-sm font-medium py-2 px-3 rounded-lg hover:bg-card text-accent transition">
+        <i class="fa-solid fa-gear mr-2"></i> Admin Panel
+      </a>
+    </div>
+  </div>
+</header>
+
+<!-- Main Content -->
+<main class="pt-16 sm:pt-20">
+
+  <!-- HOME SECTION -->
+  <section id="homeSection">
+    <!-- Hero -->
+    <div class="relative min-h-[85vh] flex items-center overflow-hidden">
+      <div class="hero-blob hero-blob-1"></div>
+      <div class="hero-blob hero-blob-2"></div>
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 relative z-10">
+        <div class="grid lg:grid-cols-2 gap-12 items-center">
+          <div class="fade-in-up">
+            <div class="inline-flex items-center gap-2 bg-accent/10 border border-accent/20 rounded-full px-4 py-1.5 mb-6">
+              <div class="w-2 h-2 bg-accent rounded-full animate-pulse"></div>
+              <span class="text-accent text-xs font-semibold tracking-wider uppercase">New Collection 2025</span>
+            </div>
+            <h1 class="font-display text-5xl sm:text-6xl lg:text-7xl font-900 leading-[0.95] mb-6">
+              Step Into<br>
+              <span class="text-accent">Excellence</span>
+            </h1>
+            <p class="text-muted text-lg max-w-md mb-8 leading-relaxed">
+              Curated premium footwear from the world's finest brands. Every pair tells a story of craftsmanship and style.
+            </p>
+            <div class="flex flex-wrap gap-4">
+              <button onclick="scrollToProducts()" class="bg-accent text-bg font-semibold px-8 py-3.5 rounded-xl hover:bg-accentDark transition-all hover:scale-[1.03] active:scale-[0.98]">
+                Explore Collection
+              </button>
+              <button onclick="toggleAdmin()" class="border border-border text-fg font-medium px-8 py-3.5 rounded-xl hover:border-accent hover:text-accent transition-all">
+                <i class="fa-solid fa-plus mr-2"></i>Add Products
+              </button>
+            </div>
+            <div class="flex items-center gap-8 mt-10 pt-8 border-t border-border">
+              <div>
+                <div class="text-2xl font-bold text-fg" id="statProducts">0</div>
+                <div class="text-xs text-muted mt-0.5">Products</div>
+              </div>
+              <div class="w-px h-10 bg-border"></div>
+              <div>
+                <div class="text-2xl font-bold text-fg" id="statBrands">0</div>
+                <div class="text-xs text-muted mt-0.5">Brands</div>
+              </div>
+              <div class="w-px h-10 bg-border"></div>
+              <div>
+                <div class="text-2xl font-bold text-accent">Free</div>
+                <div class="text-xs text-muted mt-0.5">Shipping</div>
+              </div>
+            </div>
+          </div>
+          <div class="hidden lg:block relative">
+            <div class="relative w-full aspect-square max-w-lg mx-auto">
+              <div class="absolute inset-0 rounded-full bg-accent/5 shimmer-bg"></div>
+              <div class="absolute inset-8 rounded-full border border-border/50"></div>
+              <div class="absolute inset-16 rounded-full border border-border/30"></div>
+              <img id="heroImg" src="https://picsum.photos/seed/shoehero/600/600.jpg" alt="Featured Shoe" class="absolute inset-0 m-auto w-3/5 h-3/5 object-cover rounded-3xl shadow-2xl shadow-accent/10 rotate-[-8deg] hover:rotate-0 transition-transform duration-700">
+              <!-- Floating tags -->
+              <div class="absolute top-12 right-8 bg-card/90 backdrop-blur border border-border rounded-xl px-4 py-2 text-xs font-medium animate-bounce" style="animation-duration:3s">
+                <i class="fa-solid fa-fire text-accent mr-1"></i> Trending
+              </div>
+              <div class="absolute bottom-16 left-4 bg-card/90 backdrop-blur border border-border rounded-xl px-4 py-2 text-xs font-medium animate-bounce" style="animation-duration:4s">
+                <i class="fa-solid fa-star text-accent mr-1"></i> Top Rated
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Categories -->
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-8">
+      <div class="flex flex-wrap gap-2" id="categoryFilters">
+        <button onclick="setCategory('all')" class="cat-btn active text-sm font-medium px-5 py-2 rounded-full border border-border transition-all hover:border-accent">All Shoes</button>
+        <button onclick="setCategory('sneakers')" class="cat-btn text-sm font-medium px-5 py-2 rounded-full border border-border transition-all hover:border-accent">Sneakers</button>
+        <button onclick="setCategory('casual')" class="cat-btn text-sm font-medium px-5 py-2 rounded-full border border-border transition-all hover:border-accent">Casual</button>
+        <button onclick="setCategory('formal')" class="cat-btn text-sm font-medium px-5 py-2 rounded-full border border-border transition-all hover:border-accent">Formal</button>
+        <button onclick="setCategory('sports')" class="cat-btn text-sm font-medium px-5 py-2 rounded-full border border-border transition-all hover:border-accent">Sports</button>
+        <button onclick="setCategory('boots')" class="cat-btn text-sm font-medium px-5 py-2 rounded-full border border-border transition-all hover:border-accent">Boots</button>
+      </div>
+    </div>
+
+    <!-- Products Grid -->
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-20" id="productsAnchor">
+      <div class="flex items-center justify-between mb-8">
+        <div>
+          <h2 class="font-display text-3xl sm:text-4xl font-bold">Our Collection</h2>
+          <p class="text-muted text-sm mt-1" id="productCount">Showing 0 products</p>
+        </div>
+        <select onchange="sortProducts(this.value)" class="bg-surface border border-border rounded-lg px-4 py-2 text-sm text-fg focus:outline-none focus:border-accent">
+          <option value="default">Sort by: Default</option>
+          <option value="price-asc">Price: Low to High</option>
+          <option value="price-desc">Price: High to Low</option>
+          <option value="name-asc">Name: A-Z</option>
+          <option value="name-desc">Name: Z-A</option>
+        </select>
+      </div>
+      <div id="productsGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
+        <!-- Products rendered by JS -->
+      </div>
+      <div id="emptyState" class="hidden text-center py-20">
+        <i class="fa-solid fa-box-open text-5xl text-border mb-4"></i>
+        <h3 class="text-xl font-semibold mb-2">No Products Found</h3>
+        <p class="text-muted text-sm mb-6">Add some products from the admin panel to get started.</p>
+        <button onclick="toggleAdmin()" class="bg-accent text-bg font-semibold px-6 py-3 rounded-xl hover:bg-accentDark transition">
+          <i class="fa-solid fa-plus mr-2"></i>Add Your First Product
+        </button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ADMIN SECTION -->
+  <section id="adminSection" class="admin-panel">
+    <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
+      <div class="flex items-center justify-between mb-8">
+        <div>
+          <h2 class="font-display text-3xl sm:text-4xl font-bold">Product Manager</h2>
+          <p class="text-muted text-sm mt-1">Add, edit, or remove products from your store</p>
+        </div>
+        <button onclick="showSection('home')" class="border border-border text-fg font-medium px-5 py-2.5 rounded-xl hover:border-accent hover:text-accent transition">
+          <i class="fa-solid fa-arrow-left mr-2"></i>Back to Store
+        </button>
+      </div>
+
+      <div class="grid lg:grid-cols-5 gap-8">
+        <!-- Add/Edit Form -->
+        <div class="lg:col-span-2">
+          <div class="bg-surface border border-border rounded-2xl p-6 sticky top-28">
+            <h3 class="font-semibold text-lg mb-5" id="formTitle">
+              <i class="fa-solid fa-plus-circle text-accent mr-2"></i>Add New Product
+            </h3>
+            <form id="productForm" onsubmit="handleFormSubmit(event)" class="flex flex-col gap-4">
+              <input type="hidden" id="editId" value="">
+
+              <!-- Image Upload -->
+              <div>
+                <label class="text-xs font-semibold text-muted uppercase tracking-wider mb-2 block">Product Image</label>
+                <div id="uploadZone" class="upload-zone rounded-xl p-6 text-center cursor-pointer" onclick="document.getElementById('imageInput').click()" ondragover="handleDragOver(event)" ondragleave="handleDragLeave(event)" ondrop="handleDrop(event)">
+                  <div id="uploadPlaceholder">
+                    <i class="fa-solid fa-cloud-arrow-up text-3xl text-muted mb-2"></i>
+                    <p class="text-sm text-muted">Click or drag image here</p>
+                    <p class="text-xs text-muted/60 mt-1">JPG, PNG, WebP — max 5MB</p>
+                  </div>
+                  <div id="uploadPreview" class="hidden">
+                    <img id="previewImg" src="" alt="Preview" class="w-full h-40 object-cover rounded-lg mb-2">
+                    <button type="button" onclick="clearImage(event)" class="text-xs text-danger hover:underline">Remove image</button>
+                  </div>
+                </div>
+                <input type="file" id="imageInput" accept="image/*" onchange="handleImageSelect(event)">
+              </div>
+
+              <!-- Name -->
+              <div>
+                <label class="text-xs font-semibold text-muted uppercase tracking-wider mb-1.5 block">Product Name</label>
+                <input type="text" id="prodName" required placeholder="e.g. Air Max Pro" class="w-full bg-card border border-border rounded-lg px-4 py-2.5 text-fg text-sm focus:outline-none focus:border-accent transition placeholder:text-muted/40">
+              </div>
+
+              <!-- Brand -->
+              <div>
+                <label class="text-xs font-semibold text-muted uppercase tracking-wider mb-1.5 block">Brand</label>
+                <input type="text" id="prodBrand" required placeholder="e.g. Nike" class="w-full bg-card border border-border rounded-lg px-4 py-2.5 text-fg text-sm focus:outline-none focus:border-accent transition placeholder:text-muted/40">
+              </div>
+
+              <!-- Category -->
+              <div>
+                <label class="text-xs font-semibold text-muted uppercase tracking-wider mb-1.5 block">Category</label>
+                <select id="prodCategory" required class="w-full bg-card border border-border rounded-lg px-4 py-2.5 text-fg text-sm focus:outline-none focus:border-accent transition">
+                  <option value="">Select category</option>
+                  <option value="sneakers">Sneakers</option>
+                  <option value="casual">Casual</option>
+                  <option value="formal">Formal</option>
+                  <option value="sports">Sports</option>
+                  <option value="boots">Boots</option>
+                </select>
+              </div>
+
+              <!-- Price Row -->
+              <div class="grid grid-cols-2 gap-3">
+                <div>
+                  <label class="text-xs font-semibold text-muted uppercase tracking-wider mb-1.5 block">Price (BDT)</label>
+                  <input type="number" id="prodPrice" required min="0" step="1" placeholder="5000" class="w-full bg-card border border-border rounded-lg px-4 py-2.5 text-fg text-sm focus:outline-none focus:border-accent transition placeholder:text-muted/40">
+                </div>
+                <div>
+                  <label class="text-xs font-semibold text-muted uppercase tracking-wider mb-1.5 block">Old Price (optional)</label>
+                  <input type="number" id="prodOldPrice" min="0" step="1" placeholder="6000" class="w-full bg-card border border-border rounded-lg px-4 py-2.5 text-fg text-sm focus:outline-none focus:border-accent transition placeholder:text-muted/40">
+                </div>
+              </div>
+
+              <!-- Sizes -->
+              <div>
+                <label class="text-xs font-semibold text-muted uppercase tracking-wider mb-2 block">Available Sizes</label>
+                <div class="flex flex-wrap gap-2" id="sizePicker">
+                  <button type="button" onclick="toggleSize(this,'38')" class="size-btn text-xs font-medium w-10 h-10 rounded-lg border border-border hover:border-accent transition">38</button>
+                  <button type="button" onclick="toggleSize(this,'39')" class="size-btn text-xs font-medium w-10 h-10 rounded-lg border border-border hover:border-accent transition">39</button>
+                  <button type="button" onclick="toggleSize(this,'40')" class="size-btn text-xs font-medium w-10 h-10 rounded-lg border border-border hover:border-accent transition">40</button>
+                  <button type="button" onclick="toggleSize(this,'41')" class="size-btn text-xs font-medium w-10 h-10 rounded-lg border border-border hover:border-accent transition">41</button>
+                  <button type="button" onclick="toggleSize(this,'42')" class="size-btn text-xs font-medium w-10 h-10 rounded-lg border border-border hover:border-accent transition">42</button>
+                  <button type="button" onclick="toggleSize(this,'43')" class="size-btn text-xs font-medium w-10 h-10 rounded-lg border border-border hover:border-accent transition">43</button>
+                  <button type="button" onclick="toggleSize(this,'44')" class="size-btn text-xs font-medium w-10 h-10 rounded-lg border border-border hover:border-accent transition">44</button>
+                  <button type="button" onclick="toggleSize(this,'45')" class="size-btn text-xs font-medium w-10 h-10 rounded-lg border border-border hover:border-accent transition">45</button>
+                </div>
+              </div>
+
+              <!-- Description -->
+              <div>
+                <label class="text-xs font-semibold text-muted uppercase tracking-wider mb-1.5 block">Description</label>
+                <textarea id="prodDesc" rows="3" placeholder="Brief product description..." class="w-full bg-card border border-border rounded-lg px-4 py-2.5 text-fg text-sm focus:outline-none focus:border-accent transition placeholder:text-muted/40 resize-none"></textarea>
+              </div>
+
+              <!-- Buttons -->
+              <div class="flex gap-3 mt-2">
+                <button type="submit" class="flex-1 bg-accent text-bg font-semibold py-3 rounded-xl hover:bg-accentDark transition-all hover:scale-[1.02] active:scale-[0.98]">
+                  <i class="fa-solid fa-check mr-2"></i><span id="submitText">Add Product</span>
+                </button>
+                <button type="button" onclick="resetForm()" class="px-5 py-3 border border-border rounded-xl hover:border-accent hover:text-accent transition">
+                  <i class="fa-solid fa-rotate-left"></i>
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+
+        <!-- Product List -->
+        <div class="lg:col-span-3">
+          <div class="bg-surface border border-border rounded-2xl overflow-hidden">
+            <div class="p-5 border-b border-border flex items-center justify-between">
+              <h3 class="font-semibold">
+                <i class="fa-solid fa-list text-accent mr-2"></i>All Products
+                <span id="adminProductCount" class="text-xs text-muted ml-2">(0)</span>
+              </h3>
+              <button onclick="clearAllProducts()" class="text-xs text-danger/70 hover:text-danger transition">
+                <i class="fa-solid fa-trash mr-1"></i>Clear All
+              </button>
+            </div>
+            <div id="adminProductList" class="divide-y divide-border max-h-[70vh] overflow-y-auto">
+              <!-- Admin list rendered by JS -->
+            </div>
+            <div id="adminEmpty" class="hidden text-center py-16 px-6">
+              <i class="fa-solid fa-inbox text-4xl text-border mb-3"></i>
+              <p class="text-muted text-sm">No products yet. Use the form to add your first product.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+</main>
+
+<!-- Cart Sidebar -->
+<div id="cartBackdrop" class="fixed inset-0 z-[100] hidden" onclick="toggleCart()">
+  <div class="modal-backdrop absolute inset-0"></div>
+</div>
+<aside id="cartSidebar" class="fixed top-0 right-0 h-full w-full sm:w-[420px] bg-surface border-l border-border z-[101] translate-x-full flex flex-col">
+  <div class="p-6 border-b border-border flex items-center justify-between">
+    <h3 class="font-display text-xl font-bold">
+      <i class="fa-solid fa-bag-shopping text-accent mr-2"></i>Your Cart
+    </h3>
+    <button onclick="toggleCart()" class="w-9 h-9 rounded-full border border-border flex items-center justify-center hover:border-accent hover:text-accent transition" aria-label="Close Cart">
+      <i class="fa-solid fa-xmark"></i>
+    </button>
+  </div>
+  <div id="cartItems" class="flex-1 overflow-y-auto p-6">
+    <!-- Cart items rendered by JS -->
+  </div>
+  <div id="cartEmpty" class="hidden flex-1 flex flex-col items-center justify-center p-6">
+    <i class="fa-solid fa-bag-shopping text-5xl text-border mb-4"></i>
+    <p class="text-muted text-sm">Your cart is empty</p>
+    <button onclick="toggleCart()" class="mt-4 text-accent text-sm font-medium hover:underline">Continue Shopping</button>
+  </div>
+  <div id="cartFooter" class="hidden border-t border-border p-6">
+    <div class="flex items-center justify-between mb-2">
+      <span class="text-muted text-sm">Subtotal</span>
+      <span class="font-semibold" id="cartSubtotal">৳0</span>
+    </div>
+    <div class="flex items-center justify-between mb-4">
+      <span class="text-muted text-sm">Shipping</span>
+      <span class="text-success text-sm font-medium">Free</span>
+    </div>
+    <div class="flex items-center justify-between mb-5 pt-3 border-t border-border">
+      <span class="font-semibold text-lg">Total</span>
+      <span class="font-display text-2xl font-bold text-accent" id="cartTotal">৳0</span>
+    </div>
+    <button onclick="checkout()" class="w-full bg-accent text-bg font-semibold py-3.5 rounded-xl hover:bg-accentDark transition-all hover:scale-[1.02] active:scale-[0.98]">
+      Proceed to Checkout
+    </button>
+  </div>
+</aside>
+
+<!-- Product Detail Modal -->
+<div id="productModal" class="fixed inset-0 z-[90] hidden">
+  <div class="modal-backdrop absolute inset-0" onclick="closeProductModal()"></div>
+  <div class="absolute inset-4 sm:inset-10 lg:inset-y-10 lg:inset-x-[15%] bg-surface border border-border rounded-2xl overflow-hidden flex flex-col lg:flex-row">
+    <button onclick="closeProductModal()" class="absolute top-4 right-4 z-10 w-9 h-9 rounded-full bg-bg/60 backdrop-blur border border-border flex items-center justify-center hover:border-accent hover:text-accent transition" aria-label="Close">
+      <i class="fa-solid fa-xmark"></i>
+    </button>
+    <div class="lg:w-1/2 bg-card flex items-center justify-center p-8">
+      <img id="modalImg" src="" alt="" class="max-w-full max-h-[50vh] lg:max-h-[80vh] object-contain rounded-xl">
+    </div>
+    <div class="lg:w-1/2 p-6 sm:p-8 lg:p-10 overflow-y-auto flex flex-col">
+      <span id="modalCategory" class="text-accent text-xs font-semibold uppercase tracking-wider mb-2"></span>
+      <h2 id="modalName" class="font-display text-2xl sm:text-3xl font-bold mb-1"></h2>
+      <p id="modalBrand" class="text-muted text-sm mb-4"></p>
+      <div class="flex items-baseline gap-3 mb-5">
+        <span id="modalPrice" class="font-display text-3xl font-bold text-accent"></span>
+        <span id="modalOldPrice" class="text-muted line-through text-lg hidden"></span>
+        <span id="modalDiscount" class="text-success text-xs font-bold bg-success/10 px-2 py-0.5 rounded-full hidden"></span>
+      </div>
+      <p id="modalDesc" class="text-muted text-sm leading-relaxed mb-6"></p>
+
+      <!-- Size Selection -->
+      <div class="mb-6">
+        <label class="text-xs font-semibold text-muted uppercase tracking-wider mb-3 block">Select Size</label>
+        <div id="modalSizes" class="flex flex-wrap gap-2">
+          <!-- Sizes rendered by JS -->
+        </div>
+      </div>
+
+      <!-- Quantity -->
+      <div class="mb-8">
+        <label class="text-xs font-semibold text-muted uppercase tracking-wider mb-3 block">Quantity</label>
+        <div class="flex items-center gap-1 bg-card rounded-lg border border-border w-fit">
+          <button onclick="changeModalQty(-1)" class="qty-btn w-10 h-10 flex items-center justify-center rounded-l-lg transition text-sm">
+            <i class="fa-solid fa-minus"></i>
+          </button>
+          <span id="modalQty" class="w-12 text-center font-semibold text-sm">1</span>
+          <button onclick="changeModalQty(1)" class="qty-btn w-10 h-10 flex items-center justify-center rounded-r-lg transition text-sm">
+            <i class="fa-solid fa-plus"></i>
+          </button>
+        </div>
+      </div>
+
+      <div class="mt-auto flex gap-3">
+        <button onclick="addToCartFromModal()" class="flex-1 bg-accent text-bg font-semibold py-3.5 rounded-xl hover:bg-accentDark transition-all hover:scale-[1.02] active:scale-[0.98]">
+          <i class="fa-solid fa-bag-shopping mr-2"></i>Add to Cart
+        </button>
+        <button onclick="closeProductModal();toggleAdmin();editProduct(currentModalProduct)" class="w-12 h-12 border border-border rounded-xl flex items-center justify-center hover:border-accent hover:text-accent transition" aria-label="Edit product">
+          <i class="fa-solid fa-pen text-sm"></i>
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Footer -->
+<footer class="border-t border-border bg-surface/50">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+    <div class="grid sm:grid-cols-2 lg:grid-cols-4 gap-8">
+      <div>
+        <div class="flex items-center gap-2 mb-4">
+          <div class="w-8 h-8 bg-accent rounded-lg flex items-center justify-center">
+            <i class="fa-solid fa-shoe-prints text-bg text-xs"></i>
+          </div>
+          <span class="font-display text-lg font-bold">SHOE<span class="text-accent">VAULT</span></span>
+        </div>
+        <p class="text-muted text-sm leading-relaxed">Premium footwear collection curated for the modern individual.</p>
+      </div>
+      <div>
+        <h4 class="font-semibold text-sm mb-4">Quick Links</h4>
+        <ul class="space-y-2 text-sm text-muted">
+          <li><a href="#" class="hover:text-accent transition">New Arrivals</a></li>
+          <li><a href="#" class="hover:text-accent transition">Best Sellers</a></li>
+          <li><a href="#" class="hover:text-accent transition">Sale</a></li>
+          <li><a href="#" class="hover:text-accent transition">All Brands</a></li>
+        </ul>
+      </div>
+      <div>
+        <h4 class="font-semibold text-sm mb-4">Support</h4>
+        <ul class="space-y-2 text-sm text-muted">
+          <li><a href="#" class="hover:text-accent transition">Size Guide</a></li>
+          <li><a href="#" class="hover:text-accent transition">Shipping Info</a></li>
+          <li><a href="#" class="hover:text-accent transition">Returns</a></li>
+          <li><a href="#" class="hover:text-accent transition">Contact Us</a></li>
+        </ul>
+      </div>
+      <div>
+        <h4 class="font-semibold text-sm mb-4">Follow Us</h4>
+        <div class="flex gap-3">
+          <a href="#" class="w-10 h-10 rounded-lg border border-border flex items-center justify-center hover:border-accent hover:text-accent transition" aria-label="Facebook"><i class="fa-brands fa-facebook-f text-sm"></i></a>
+          <a href="#" class="w-10 h-10 rounded-lg border border-border flex items-center justify-center hover:border-accent hover:text-accent transition" aria-label="Instagram"><i class="fa-brands fa-instagram text-sm"></i></a>
+          <a href="#" class="w-10 h-10 rounded-lg border border-border flex items-center justify-center hover:border-accent hover:text-accent transition" aria-label="Twitter"><i class="fa-brands fa-x-twitter text-sm"></i></a>
+        </div>
+      </div>
+    </div>
+    <div class="mt-10 pt-6 border-t border-border text-center text-xs text-muted">
+      SHOEVAULT 2025. All rights reserved. Built with care.
+    </div>
+  </div>
+</footer>
+
+<script>
+// ========== STATE ==========
+let products = [];
+let cart = [];
+let currentCategory = 'all';
+let currentSort = 'default';
+let currentSearch = '';
+let selectedSizes = [];
+let currentImageData = '';
+let currentModalProduct = null;
+let modalQty = 1;
+let modalSelectedSize = '';
+let cartOpen = false;
+
+// ========== DEFAULT PRODUCTS ==========
+const defaultProducts = [
+  {
+    id: 'd1', name: 'Air Max Pulse', brand: 'Nike', category: 'sneakers',
+    price: 12500, oldPrice: 15000, sizes: ['40','41','42','43','44'],
+    description: 'The Nike Air Max Pulse draws inspiration from the energy of London music, delivering a fresh take on an iconic design with visible Air cushioning.',
+    image: 'https://picsum.photos/seed/airmax/500/500.jpg'
+  },
+  {
+    id: 'd2', name: 'Ultraboost Light', brand: 'Adidas', category: 'sports',
+    price: 14200, oldPrice: 0, sizes: ['39','40','41','42','43'],
+    description: 'Experience incredible energy return with the Ultraboost Light. Featuring LIGHT BOOST cushioning for your most responsive run ever.',
+    image: 'https://picsum.photos/seed/ultraboost/500/500.jpg'
+  },
+  {
+    id: 'd3', name: 'Classic Leather', brand: 'Reebok', category: 'casual',
+    price: 6800, oldPrice: 8500, sizes: ['38','39','40','41','42','43'],
+    description: 'The timeless Classic Leather silhouette with soft leather upper and die-cut EVA midsole for all-day comfort.',
+    image: 'https://picsum.photos/seed/reebokcl/500/500.jpg'
+  },
+  {
+    id: 'd4', name: 'Oxford Premium', brand: 'Clarks', category: 'formal',
+    price: 9900, oldPrice: 0, sizes: ['40','41','42','43','44','45'],
+    description: 'Handcrafted Oxford shoes with premium leather upper, cushioned insole, and durable rubber outsole for formal occasions.',
+    image: 'https://picsum.photos/seed/oxford1/500/500.jpg'
+  },
+  {
+    id: 'd5', name: 'Timberland 6-Inch', brand: 'Timberland', category: 'boots',
+    price: 18500, oldPrice: 22000, sizes: ['40','41','42','43','44'],
+    description: 'The iconic 6-inch waterproof boot with premium leather, seam-sealed construction, and anti-fatigue technology.',
+    image: 'https://picsum.photos/seed/timber6/500/500.jpg'
+  },
+  {
+    id: 'd6', name: 'Gel-Kayano 30', brand: 'Asics', category: 'sports',
+    price: 15800, oldPrice: 0, sizes: ['39','40','41','42','43','44'],
+    description: 'Engineered for stability and long-distance comfort with FF BLAST PLUS cushioning and 4D GUIDANCE SYSTEM.',
+    image: 'https://picsum.photos/seed/kayano30/500/500.jpg'
+  },
+  {
+    id: 'd7', name: 'Old Skool', brand: 'Vans', category: 'casual',
+    price: 5200, oldPrice: 6500, sizes: ['38','39','40','41','42','43','44'],
+    description: 'The classic Vans silhouette featuring the iconic side stripe, canvas and suede upper, and waffle rubber outsole.',
+    image: 'https://picsum.photos/seed/oldskool/500/500.jpg'
+  },
+  {
+    id: 'd8', name: 'Chelsea Boot', brand: 'Dr. Martens', category: 'boots',
+    price: 16200, oldPrice: 0, sizes: ['40','41','42','43','44','45'],
+    description: 'Classic Chelsea boot with smooth leather, elastic side gussets, AirWair bouncing sole, and Goodyear welt construction.',
+    image: 'https://picsum.photos/seed/chelseaboot/500/500.jpg'
+  }
+];
+
+// ========== INIT ==========
+function init() {
+  const stored = localStorage.getItem('shoevault_products');
+  if (stored) {
+    products = JSON.parse(stored);
+  } else {
+    products = [...defaultProducts];
+    saveProducts();
+  }
+  const storedCart = localStorage.getItem('shoevault_cart');
+  if (storedCart) cart = JSON.parse(storedCart);
+  renderProducts();
+  renderAdminList();
+  updateCartBadge();
+  updateStats();
+}
+
+function saveProducts() {
+  localStorage.setItem('shoevault_products', JSON.stringify(products));
+}
+function saveCart() {
+  localStorage.setItem('shoevault_cart', JSON.stringify(cart));
+}
+
+// ========== SECTIONS ==========
+function showSection(section) {
+  document.getElementById('homeSection').style.display = section === 'home' ? 'block' : 'none';
+  document.getElementById('adminSection').classList.toggle('show', section === 'admin');
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+  if (section === 'admin') renderAdminList();
+}
+
+function toggleAdmin() {
+  const admin = document.getElementById('adminSection');
+  if (admin.classList.contains('show')) {
+    showSection('home');
+  } else {
+    showSection('admin');
+  }
+}
+
+// ========== PRODUCT RENDERING ==========
+function getFilteredProducts() {
+  let filtered = [...products];
+  if (currentCategory !== 'all') {
+    filtered = filtered.filter(p => p.category === currentCategory);
+  }
+  if (currentSearch.trim()) {
+    const q = currentSearch.toLowerCase();
+    filtered = filtered.filter(p =>
+      p.name.toLowerCase().includes(q) ||
+      p.brand.toLowerCase().includes(q) ||
+      p.category.toLowerCase().includes(q)
+    );
+  }
+  // Sort
+  switch (currentSort) {
+    case 'price-asc': filtered.sort((a, b) => a.price - b.price); break;
+    case 'price-desc': filtered.sort((a, b) => b.price - a.price); break;
+    case 'name-asc': filtered.sort((a, b) => a.name.localeCompare(b.name)); break;
+    case 'name-desc': filtered.sort((a, b) => b.name.localeCompare(a.name)); break;
+  }
+  return filtered;
+}
+
+function renderProducts() {
+  const grid = document.getElementById('productsGrid');
+  const empty = document.getElementById('emptyState');
+  const filtered = getFilteredProducts();
+  document.getElementById('productCount').textContent = `Showing ${filtered.length} product${filtered.length !== 1 ? 's' : ''}`;
+
+  if (filtered.length === 0) {
+    grid.innerHTML = '';
+    empty.classList.remove('hidden');
+    return;
+  }
+  empty.classList.add('hidden');
+
+  grid.innerHTML = filtered.map((p, i) => {
+    const discount = p.oldPrice > 0 ? Math.round((1 - p.price / p.oldPrice) * 100) : 0;
+    return `
+      <div class="product-card group bg-card border border-border rounded-2xl overflow-hidden cursor-pointer hover:border-accent/40 transition-all duration-300" style="animation:fadeInUp 0.5s ease ${i * 0.06}s both" onclick="openProductModal('${p.id}')">
+        <div class="relative aspect-square bg-surface overflow-hidden">
+          <img src="${p.image}" alt="${p.name}" class="product-img w-full h-full object-cover" loading="lazy" onerror="this.src='https://picsum.photos/seed/fallback${p.id}/500/500.jpg'">
+          <div class="product-overlay absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent flex items-end p-4">
+            <div class="flex gap-2 w-full">
+              <button onclick="event.stopPropagation();addToCart('${p.id}')" class="flex-1 bg-accent text-bg text-xs font-semibold py-2.5 rounded-lg hover:bg-accentDark transition">
+                <i class="fa-solid fa-bag-shopping mr-1"></i> Add to Cart
+              </button>
+              <button onclick="event.stopPropagation();toggleAdmin();editProduct('${p.id}')" class="w-10 bg-bg/70 backdrop-blur text-fg rounded-lg hover:text-accent transition" aria-label="Edit">
+                <i class="fa-solid fa-pen text-xs"></i>
+              </button>
+            </div>
+          </div>
+          ${discount > 0 ? `<span class="absolute top-3 left-3 bg-danger text-white text-[10px] font-bold px-2.5 py-1 rounded-full">-${discount}%</span>` : ''}
+          <span class="absolute top-3 right-3 bg-bg/60 backdrop-blur text-[10px] font-semibold text-fg/80 px-2.5 py-1 rounded-full uppercase">${p.category}</span>
+        </div>
+        <div class="p-4">
+          <p class="text-xs text-muted mb-1">${p.brand}</p>
+          <h3 class="font-semibold text-sm mb-2 group-hover:text-accent transition truncate">${p.name}</h3>
+          <div class="flex items-baseline gap-2">
+            <span class="font-bold text-accent">৳${p.price.toLocaleString()}</span>
+            ${p.oldPrice > 0 ? `<span class="text-xs text-muted line-through">৳${p.oldPrice.toLocaleString()}</span>` : ''}
+          </div>
+          <div class="mt-2 flex gap-1">
+            ${p.sizes.slice(0, 5).map(s => `<span class="text-[10px] text-muted bg-surface px-1.5 py-0.5 rounded">${s}</span>`).join('')}
+            ${p.sizes.length > 5 ? `<span class="text-[10px] text-muted">+${p.sizes.length - 5}</span>` : ''}
+          </div>
+        </div>
+      </div>
+    `;
+  }).join('');
+}
+
+// ========== CATEGORIES ==========
+function setCategory(cat) {
+  currentCategory = cat;
+  document.querySelectorAll('.cat-btn').forEach(btn => btn.classList.remove('active'));
+  event.target.classList.add('active');
+  renderProducts();
+}
+
+// ========== SORT ==========
+function sortProducts(val) {
+  currentSort = val;
+  renderProducts();
+}
+
+// ========== SEARCH ==========
+function toggleSearch() {
+  const bar = document.getElementById('searchBar');
+  bar.classList.toggle('hidden');
+  if (!bar.classList.contains('hidden')) {
+    document.getElementById('searchInput').focus();
+  }
+}
+function filterProducts() {
+  currentSearch = document.getElementById('searchInput').value;
+  renderProducts();
+}
+function scrollToProducts() {
+  showSection('home');
+  setTimeout(() => {
+    document.getElementById('productsAnchor').scrollIntoView({ behavior: 'smooth' });
+  }, 100);
+}
+
+// ========== IMAGE UPLOAD ==========
+function handleImageSelect(e) {
+  const file = e.target.files[0];
+  if (!file) return;
+  processFile(file);
+}
+function handleDragOver(e) {
+  e.preventDefault();
+  document.getElementById('uploadZone').classList.add('dragover');
+}
+function handleDragLeave(e) {
+  e.preventDefault();
+  document.getElementById('uploadZone').classList.remove('dragover');
+}
+function handleDrop(e) {
+  e.preventDefault();
+  document.getElementById('uploadZone').classList.remove('dragover');
+  const file = e.dataTransfer.files[0];
+  if (file && file.type.startsWith('image/')) processFile(file);
+}
+function processFile(file) {
+  if (file.size > 5 * 1024 * 1024) {
+    showToast('Image must be under 5MB', 'error');
+    return;
+  }
+  const reader = new FileReader();
+  reader.onload = function(e) {
+    currentImageData = e.target.result;
+    document.getElementById('previewImg').src = currentImageData;
+    document.getElementById('uploadPlaceholder').classList.add('hidden');
+    document.getElementById('uploadPreview').classList.remove('hidden');
+  };
+  reader.readAsDataURL(file);
+}
+function clearImage(e) {
+  e.stopPropagation();
+  currentImageData = '';
+  document.getElementById('imageInput').value = '';
+  document.getElementById('uploadPlaceholder').classList.remove('hidden');
+  document.getElementById('uploadPreview').classList.add('hidden');
+}
+
+// ========== SIZE PICKER ==========
+function toggleSize(btn, size) {
+  const idx = selectedSizes.indexOf(size);
+  if (idx > -1) {
+    selectedSizes.splice(idx, 1);
+    btn.classList.remove('selected');
+  } else {
+    selectedSizes.push(size);
+    btn.classList.add('selected');
+  }
+}
+
+// ========== FORM SUBMIT ==========
+function handleFormSubmit(e) {
+  e.preventDefault();
+  const editId = document.getElementById('editId').value;
+  const name = document.getElementById('prodName').value.trim();
+  const brand = document.getElementById('prodBrand').value.trim();
+  const category = document.getElementById('prodCategory').value;
+  const price = parseInt(document.getElementById('prodPrice').value);
+  const oldPrice = parseInt(document.getElementById('prodOldPrice').value) || 0;
+  const desc = document.getElementById('prodDesc').value.trim();
+
+  if (!name || !brand || !category || isNaN(price) || price < 0) {
+    showToast('Please fill all required fields', 'error');
+    return;
+  }
+  if (selectedSizes.length === 0) {
+    showToast('Please select at least one size', 'error');
+    return;
+  }
+
+  const image = currentImageData || `https://picsum.photos/seed/${name.replace(/\s/g,'')}${Date.now()}/500/500.jpg`;
+
+  if (editId) {
+    // Update existing
+    const idx = products.findIndex(p => p.id === editId);
+    if (idx > -1) {
+      products[idx] = { ...products[idx], name, brand, category, price, oldPrice, sizes: [...selectedSizes], description: desc, image };
+      showToast('Product updated successfully', 'success');
+    }
+  } else {
+    // Add new
+    const newProduct = {
+      id: 'p' + Date.now(),
+      name, brand, category, price, oldPrice,
+      sizes: [...selectedSizes],
+      description: desc,
+      image
+    };
+    products.unshift(newProduct);
+    showToast('Product added successfully', 'success');
+  }
+
+  saveProducts();
+  resetForm();
+  renderProducts();
+  renderAdminList();
+  updateStats();
+}
+
+function resetForm() {
+  document.getElementById('productForm').reset();
+  document.getElementById('editId').value = '';
+  clearImage(new Event('click'));
+  selectedSizes = [];
+  document.querySelectorAll('.size-btn').forEach(b => b.classList.remove('selected'));
+  document.getElementById('formTitle').innerHTML = '<i class="fa-solid fa-plus-circle text-accent mr-2"></i>Add New Product';
+  document.getElementById('submitText').textContent = 'Add Product';
+  currentImageData = '';
+}
+
+function editProduct(id) {
+  const p = products.find(pr => pr.id === id);
+  if (!p) return;
+  showSection('admin');
+  document.getElementById('editId').value = p.id;
+  document.getElementById('prodName').value = p.name;
+  document.getElementById('prodBrand').value = p.brand;
+  document.getElementById('prodCategory').value = p.category;
+  document.getElementById('prodPrice').value = p.price;
+  document.getElementById('prodOldPrice').value = p.oldPrice || '';
+  document.getElementById('prodDesc').value = p.description || '';
+
+  // Set image
+  currentImageData = p.image;
+  document.getElementById('previewImg').src = p.image;
+  document.getElementById('uploadPlaceholder').classList.add('hidden');
+  document.getElementById('uploadPreview').classList.remove('hidden');
+
+  // Set sizes
+  selectedSizes = [...p.sizes];
+  document.querySelectorAll('.size-btn').forEach(btn => {
+    const size = btn.textContent.trim();
+    btn.classList.toggle('selected', selectedSizes.includes(size));
+  });
+
+  document.getElementById('formTitle').innerHTML = '<i class="fa-solid fa-pen-to-square text-accent mr-2"></i>Edit Product';
+  document.getElementById('submitText').textContent = 'Update Product';
+
+  // Scroll form into view
+  document.getElementById('productForm').scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+function deleteProduct(id) {
+  products = products.filter(p => p.id !== id);
+  // Also remove from cart
+  cart = cart.filter(c => c.productId !== id);
+  saveProducts();
+  saveCart();
+  renderProducts();
+  renderAdminList();
+  updateCartBadge();
+  updateStats();
+  showToast('Product deleted', 'success');
+}
+
+function clearAllProducts() {
+  if (products.length === 0) return;
+  // Custom confirm
+  const confirmed = products.length > 0;
+  if (confirmed) {
+    // Use inline confirm via a toast-like approach
+    showConfirmModal('Delete all products? This cannot be undone.', () => {
+      products = [];
+      cart = [];
+      saveProducts();
+      saveCart();
+      renderProducts();
+      renderAdminList();
+      updateCartBadge();
+      updateStats();
+      showToast('All products cleared', 'success');
+    });
+  }
+}
+
+// ========== ADMIN LIST ==========
+function renderAdminList() {
+  const list = document.getElementById('adminProductList');
+  const empty = document.getElementById('adminEmpty');
+  document.getElementById('adminProductCount').textContent = `(${products.length})`;
+
+  if (products.length === 0) {
+    list.innerHTML = '';
+    empty.classList.remove('hidden');
+    return;
+  }
+  empty.classList.add('hidden');
+
+  list.innerHTML = products.map(p => `
+    <div class="flex items-center gap-4 p-4 hover:bg-card/50 transition group">
+      <img src="${p.image}" alt="${p.name}" class="w-14 h-14 rounded-lg object-cover flex-shrink-0 border border-border" onerror="this.src='https://picsum.photos/seed/fb${p.id}/100/100.jpg'">
+      <div class="flex-1 min-w-0">
+        <h4 class="font-medium text-sm truncate">${p.name}</h4>
+        <p class="text-xs text-muted">${p.brand} · ${p.category}</p>
+        <div class="flex items-baseline gap-2 mt-0.5">
+          <span class="text-sm font-bold text-accent">৳${p.price.toLocaleString()}</span>
+          ${p.oldPrice > 0 ? `<span class="text-[10px] text-muted line-through">৳${p.oldPrice.toLocaleString()}</span>` : ''}
+        </div>
+      </div>
+      <div class="flex gap-1 opacity-60 group-hover:opacity-100 transition flex-shrink-0">
+        <button onclick="editProduct('${p.id}')" class="w-8 h-8 rounded-lg border border-border flex items-center justify-center hover:border-accent hover:text-accent transition" aria-label="Edit">
+          <i class="fa-solid fa-pen text-[10px]"></i>
+        </button>
+        <button onclick="deleteProduct('${p.id}')" class="w-8 h-8 rounded-lg border border-border flex items-center justify-center hover:border-danger hover:text-danger transition" aria-label="Delete">
+          <i class="fa-solid fa-trash text-[10px]"></i>
+        </button>
+      </div>
+    </div>
+  `).join('');
+}
+
+// ========== PRODUCT MODAL ==========
+function openProductModal(id) {
+  const p = products.find(pr => pr.id === id);
+  if (!p) return;
+  currentModalProduct = id;
+  modalQty = 1;
+  modalSelectedSize = p.sizes.length > 0 ? p.sizes[0] : '';
+
+  document.getElementById('modalImg').src = p.image;
+  document.getElementById('modalImg').alt = p.name;
+  document.getElementById('modalCategory').textContent = p.category;
+  document.getElementById('modalName').textContent = p.name;
+  document.getElementById('modalBrand').textContent = p.brand;
+  document.getElementById('modalPrice').textContent = `৳${p.price.toLocaleString()}`;
+  document.getElementById('modalDesc').textContent = p.description || 'No description available.';
+
+  const oldPriceEl = document.getElementById('modalOldPrice');
+  const discountEl = document.getElementById('modalDiscount');
+  if (p.oldPrice > 0) {
+    oldPriceEl.textContent = `৳${p.oldPrice.toLocaleString()}`;
+    oldPriceEl.classList.remove('hidden');
+    const disc = Math.round((1 - p.price / p.oldPrice) * 100);
+    discountEl.textContent = `-${disc}%`;
+    discountEl.classList.remove('hidden');
+  } else {
+    oldPriceEl.classList.add('hidden');
+    discountEl.classList.add('hidden');
+  }
+
+  // Sizes
+  const sizesContainer = document.getElementById('modalSizes');
+  sizesContainer.innerHTML = p.sizes.map((s, i) => `
+    <button onclick="selectModalSize('${s}', this)" class="size-btn text-sm font-medium w-12 h-10 rounded-lg border border-border hover:border-accent transition ${i === 0 ? 'selected' : ''}">${s}</button>
+  `).join('');
+
+  document.getElementById('modalQty').textContent = '1';
+  document.getElementById('productModal').classList.remove('hidden');
+  document.body.style.overflow = 'hidden';
+}
+
+function closeProductModal() {
+  document.getElementById('productModal').classList.add('hidden');
+  document.body.style.overflow = '';
+  currentModalProduct = null;
+}
+
+function selectModalSize(size, btn) {
+  modalSelectedSize = size;
+  document.querySelectorAll('#modalSizes .size-btn').forEach(b => b.classList.remove('selected'));
+  btn.classList.add('selected');
+}
+
+function changeModalQty(delta) {
+  modalQty = Math.max(1, Math.min(10, modalQty + delta));
+  document.getElementById('modalQty').textContent = modalQty;
+}
+
+function addToCartFromModal() {
+  if (!modalSelectedSize) {
+    showToast('Please select a size', 'error');
+    return;
+  }
+  const p = products.find(pr => pr.id === currentModalProduct);
+  if (!p) return;
+  addToCartWithDetails(p, modalSelectedSize, modalQty);
+  closeProductModal();
+}
+
+// ========== CART ==========
+function addToCart(id) {
+  const p = products.find(pr => pr.id === id);
+  if (!p) return;
+  const size = p.sizes.length > 0 ? p.sizes[0] : 'Free';
+  addToCartWithDetails(p, size, 1);
+}
+
+function addToCartWithDetails(product, size, qty) {
+  const key = `${product.id}_${size}`;
+  const existing = cart.find(c => c.key === key);
+  if (existing) {
+    existing.qty = Math.min(10, existing.qty + qty);
+  } else {
+    cart.push({
+      key,
+      productId: product.id,
+      name: product.name,
+      brand: product.brand,
+      price: product.price,
+      image: product.image,
+      size,
+      qty
+    });
+  }
+  saveCart();
+  updateCartBadge();
+  renderCart();
+  showToast(`${product.name} added to cart`, 'success');
+  if (!cartOpen) toggleCart();
+}
+
+function removeFromCart(key) {
+  cart = cart.filter(c => c.key !== key);
+  saveCart();
+  updateCartBadge();
+  renderCart();
+}
+
+function updateCartQty(key, delta) {
+  const item = cart.find(c => c.key === key);
+  if (!item) return;
+  item.qty += delta;
+  if (item.qty <= 0) {
+    removeFromCart(key);
+    return;
+  }
+  item.qty = Math.min(10, item.qty);
+  saveCart();
+  updateCartBadge();
+  renderCart();
+}
+
+function updateCartBadge() {
+  const badge = document.getElementById('cartBadge');
+  const total = cart.reduce((s, c) => s + c.qty, 0);
+  if (total > 0) {
+    badge.textContent = total;
+    badge.classList.remove('hidden');
+  } else {
+    badge.classList.add('hidden');
+  }
+}
+
+function renderCart() {
+  const itemsEl = document.getElementById('cartItems');
+  const emptyEl = document.getElementById('cartEmpty');
+  const footerEl = document.getElementById('cartFooter');
+
+  if (cart.length === 0) {
+    itemsEl.classList.add('hidden');
+    emptyEl.classList.remove('hidden');
+    footerEl.classList.add('hidden');
+    return;
+  }
+
+  emptyEl.classList.add('hidden');
+  itemsEl.classList.remove('hidden');
+  footerEl.classList.remove('hidden');
+
+  itemsEl.innerHTML = cart.map(c => `
+    <div class="flex gap-4 mb-5 pb-5 border-b border-border last:border-0">
+      <img src="${c.image}" alt="${c.name}" class="w-20 h-20 rounded-xl object-cover border border-border flex-shrink-0" onerror="this.src='https://picsum.photos/seed/fb${c.productId}/100/100.jpg'">
+      <div class="flex-1 min-w-0">
+        <h4 class="font-medium text-sm truncate">${c.name}</h4>
+        <p class="text-xs text-muted mt-0.5">${c.brand} · Size: ${c.size}</p>
+        <p class="text-sm font-bold text-accent mt-1">৳${c.price.toLocaleString()}</p>
+        <div class="flex items-center gap-1 mt-2 bg-card rounded-lg border border-border w-fit">
+          <button onclick="updateCartQty('${c.key}',-1)" class="qty-btn w-7 h-7 flex items-center justify-center rounded-l-lg transition text-[10px]">
+            <i class="fa-solid fa-minus"></i>
+          </button>
+          <span class="w-8 text-center text-xs font-semibold">${c.qty}</span>
+          <button onclick="updateCartQty('${c.key}',1)" class="qty-btn w-7 h-7 flex items-center justify-center rounded-r-lg transition text-[10px]">
+            <i class="fa-solid fa-plus"></i>
+          </button>
+        </div>
+      </div>
+      <button onclick="removeFromCart('${c.key}')" class="self-start w-7 h-7 rounded-lg border border-border flex items-center justify-center hover:border-danger hover:text-danger transition flex-shrink-0" aria-label="Remove">
+        <i class="fa-solid fa-xmark text-[10px]"></i>
+      </button>
+    </div>
+  `).join('');
+
+  const subtotal = cart.reduce((s, c) => s + c.price * c.qty, 0);
+  document.getElementById('cartSubtotal').textContent = `৳${subtotal.toLocaleString()}`;
+  document.getElementById('cartTotal').textContent = `৳${subtotal.toLocaleString()}`;
+}
+
+function toggleCart() {
+  const backdrop = document.getElementById('cartBackdrop');
+  const sidebar = document.getElementById('cartSidebar');
+  cartOpen = !cartOpen;
+
+  if (cartOpen) {
+    backdrop.classList.remove('hidden');
+    sidebar.classList.remove('translate-x-full');
+    sidebar.classList.add('cart-open');
+    sidebar.classList.remove('cart-close');
+    document.body.style.overflow = 'hidden';
+    renderCart();
+  } else {
+    sidebar.classList.remove('cart-open');
+    sidebar.classList.add('cart-close');
+    document.body.style.overflow = '';
+    setTimeout(() => {
+      backdrop.classList.add('hidden');
+      sidebar.classList.add('translate-x-full');
+      sidebar.classList.remove('cart-close');
+    }, 300);
+  }
+}
+
+function checkout() {
+  if (cart.length === 0) return;
+  const total = cart.reduce((s, c) => s + c.price * c.qty, 0);
+  showConfirmModal(`Confirm checkout for ৳${total.toLocaleString()}?`, () => {
+    cart = [];
+    saveCart();
+    updateCartBadge();
+    renderCart();
+    toggleCart();
+    showToast('Order placed successfully! Thank you for your purchase.', 'success');
+  });
+}
+
+// ========== MOBILE MENU ==========
+function toggleMobileMenu() {
+  document.getElementById('mobileMenu').classList.toggle('hidden');
+}
+
+// ========== STATS ==========
+function updateStats() {
+  document.getElementById('statProducts').textContent = products.length;
+  const brands = new Set(products.map(p => p.brand));
+  document.getElementById('statBrands').textContent = brands.size;
+}
+
+// ========== TOAST ==========
+function showToast(message, type = 'info') {
+  const container = document.getElementById('toastContainer');
+  const toast = document.createElement('div');
+  const colors = {
+    success: 'border-success bg-success/10 text-success',
+    error: 'border-danger bg-danger/10 text-danger',
+    info: 'border-accent bg-accent/10 text-accent'
+  };
+  const icons = {
+    success: 'fa-check-circle',
+    error: 'fa-exclamation-circle',
+    info: 'fa-info-circle'
+  };
+  toast.className = `pointer-events-auto flex items-center gap-3 px-5 py-3 rounded-xl border backdrop-blur-xl text-sm font-medium toast-in ${colors[type] || colors.info}`;
+  toast.innerHTML = `<i class="fa-solid ${icons[type] || icons.info}"></i><span>${message}</span>`;
+  container.appendChild(toast);
+
+  setTimeout(() => {
+    toast.classList.remove('toast-in');
+    toast.classList.add('toast-out');
+    setTimeout(() => toast.remove(), 300);
+  }, 3000);
+}
+
+// ========== CONFIRM MODAL ==========
+function showConfirmModal(message, onConfirm) {
+  const existing = document.getElementById('confirmModal');
+  if (existing) existing.remove();
+
+  const modal = document.createElement('div');
+  modal.id = 'confirmModal';
+  modal.className = 'fixed inset-0 z-[200] flex items-center justify-center p-4';
+  modal.innerHTML = `
+    <div class="modal-backdrop absolute inset-0" onclick="this.parentElement.remove()"></div>
+    <div class="relative bg-surface border border-border rounded-2xl p-6 max-w-sm w-full shadow-2xl" style="animation:fadeInUp 0.3s ease">
+      <div class="w-12 h-12 rounded-full bg-danger/10 flex items-center justify-center mx-auto mb-4">
+        <i class="fa-solid fa-triangle-exclamation text-danger text-xl"></i>
+      </div>
+      <p class="text-center text-sm text-fg/90 mb-6">${message}</p>
+      <div class="flex gap-3">
+        <button onclick="this.closest('#confirmModal').remove()" class="flex-1 py-2.5 rounded-xl border border-border text-sm font-medium hover:border-accent hover:text-accent transition">Cancel</button>
+        <button id="confirmBtn" class="flex-1 py-2.5 rounded-xl bg-danger text-white text-sm font-semibold hover:bg-danger/80 transition">Confirm</button>
+      </div>
+    </div>
+  `;
+  document.body.appendChild(modal);
+  document.body.style.overflow = 'hidden';
+  document.getElementById('confirmBtn').onclick = () => {
+    modal.remove();
+    document.body.style.overflow = '';
+    onConfirm();
+  };
+}
+
+// ========== KEYBOARD ==========
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'Escape') {
+    closeProductModal();
+    if (cartOpen) toggleCart();
+    const confirm = document.getElementById('confirmModal');
+    if (confirm) confirm.remove();
+    document.body.style.overflow = '';
+  }
+});
+
+// ========== START ==========
+init();
+</script>
+</body>
+</html>
